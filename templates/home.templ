@@ -1,0 +1,47 @@
+package templates
+
+templ HomeTempl() {
+	<html lang="es">
+		<head>
+			<link rel="preconnect" href="https://fonts.googleapis.com"/>
+			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+			<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;1,100&display=swap" rel="stylesheet"/>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>OneVote - Inicio</title>
+			<link rel="stylesheet" href="/static/styles.css"/>
+			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+		</head>
+		<body>
+			<nav class="navbar">
+				<div class="navbar-logo">
+					<a href="#">OneVote</a>
+				</div>
+				<div class="navbar-links">
+					<a href="/candidates">Candidatos</a>
+				</div>
+			</nav>
+			<div class="container">
+				<div class="hero-section">
+					<div class="hero-content">
+						<h1>Beinvenido a OneVote</h1>
+						<p>Plataforma de voto no presencial basada en blockchain</p>
+					</div>
+				</div>
+				<div class="login-section">
+					<div class="login-form">
+						<h2>Login</h2>
+						<form action="#" hx-post="/verify-cip" hx-target="#login-error">
+							<div class="form-group">
+								<label for="CIP">CIP:</label>
+								<input type="text" id="cip" name="cip" placeholder="Ingresa tu CIP" required/>
+							</div>
+							<button type="submit" class="btn">Login</button>
+						</form>
+						<div id="login-error"></div>
+					</div>
+				</div>
+			</div>
+		</body>
+	</html>
+}

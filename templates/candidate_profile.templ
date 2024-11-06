@@ -1,0 +1,42 @@
+package templates
+
+import (
+    
+	"onevote/models"
+)
+
+type CandidateProfileData struct {
+    Candidate *models.Candidate
+}
+
+templ CandidateProfileTempl(data CandidateProfileData) {
+    <html lang="es">
+		<head>
+			<link rel="stylesheet" href="/static/styles.css"/>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Perfil</title>
+			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+		</head>
+		<body>
+			<nav class="navbar">
+				<div class="navbar-logo">
+					<a href="#">OneVote</a>
+				</div>
+				<div class="navbar-links">
+					<a href="/candidates">Candidatos</a>
+				</div>
+			</nav>
+			<div class="container">
+				<div class="profile-section">
+					<div class="profile-container">
+						<h2>Perfil</h2>
+						<p><strong>Nombre:</strong> { data.Candidate.Name }</p>
+						<p><strong>Apelido paterno:</strong> { data.Candidate.FatherLastName }</p>
+						<p><strong>Apelido materno:</strong> { data.Candidate.MotherLastName }</p>
+					</div>
+				</div>
+			</div>
+		</body>
+	</html>
+}

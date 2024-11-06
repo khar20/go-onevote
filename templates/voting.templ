@@ -1,0 +1,48 @@
+package templates
+
+import (
+	"onevote/models"
+)
+
+type VotingData struct {
+	Candidates []models.Candidate
+}
+
+templ VotingTempl(data VotingData) {
+	<html lang="es">
+		<head>
+			<link rel="stylesheet" href="/static/styles.css"/>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>OneVote - Votación</title>
+			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+		</head>
+		<body>
+			<nav class="navbar">
+				<div class="navbar-logo">
+					<a href="#">OneVote</a>
+				</div>
+				<div class="navbar-links">
+					<a href="/candidates">Candidatos</a>
+				</div>
+			</nav>
+			<div class="container">
+				<div class="voting-section">
+					<div class="voting-form">
+						<h2>Selecciona tus candidatos</h2>
+						<form hx-post="/vote" hx-target="#result">
+							for _, candidate := range data.Candidates {
+								<div class="form-group">
+									<input type="radio" id={ candidate.Name } name="candidate" value={ candidate.Name } required/>
+									<label for={ candidate.Name }>{ candidate.Name }</label>
+								</div>
+								<button class="btn" type="submit">Enviar votos</button>
+							}
+						</form>
+						<div id="result"></div>
+					</div>
+				</div>
+			</div>
+		</body>
+	</html>
+}

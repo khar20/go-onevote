@@ -1,0 +1,50 @@
+package templates
+
+import (
+
+)
+
+type LoginData struct {
+	Cip string
+}
+
+templ LoginTempl(data LoginData) {
+	<html lang="es">
+		<head>
+			<link rel="stylesheet" href="/static/styles.css"/>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Login</title>
+			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+		</head>
+		<body>
+			<nav class="navbar">
+				<div class="navbar-logo">
+					<a href="#">OneVote</a>
+				</div>
+				<div class="navbar-links">
+					<a href="/candidates">Candidatos</a>
+				</div>
+			</nav>
+			<div class="container">
+				<div class="login-section">
+					<div class="login-form">
+						<h2>Login</h2>
+						<form hx-post="/login" hx-target="#login-result" hx-swap="innerHTML" hx-trigger="submit">
+							<div class="form-group">
+								<label for="cip">CIP</label>
+								<input type="text" id="cip" name="cip" value={ data.Cip } required/>
+							</div>
+							<div class="form-group">
+								<label for="password">Password</label>
+								<input type="password" id="password" name="password" required/>
+							</div>
+							<button class="btn" type="submit">Login</button>
+						</form>
+						<div id="login-result"></div>
+					</div>
+				</div>
+			</div>
+		</body>
+	</html>
+}

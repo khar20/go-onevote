@@ -1,0 +1,43 @@
+package templates
+
+import (
+	"onevote/models"
+)
+
+type UserProfileData struct {
+	User *models.User
+}
+
+templ UserProfileTempl(data UserProfileData) {
+	<html lang="es">
+		<head>
+			<link rel="stylesheet" href="/static/styles.css"/>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Perfil</title>
+			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+		</head>
+		<body>
+			<nav class="navbar">
+				<div class="navbar-logo">
+					<a href="#">OneVote</a>
+				</div>
+				<div class="navbar-links">
+					<a href="/candidates">Candidatos</a>
+				</div>
+			</nav>
+			<div class="container">
+				<div class="profile-section">
+					<div class="profile-container">
+						<h2>Perfil</h2>
+						<p><strong>Nombre:</strong> { data.User.Name }</p>
+						<p><strong>Apelido paterno:</strong> { data.User.FatherLastName }</p>
+						<p><strong>Apelido materno:</strong> { data.User.MotherLastName }</p>
+						<button class="btn" onclick="location.href = '/vote';">Realizar voto</button>
+						<button class="btn logout-btn" hx-post="/users/logout">Cerrar sesión</button>
+					</div>
+				</div>
+			</div>
+		</body>
+	</html>
+}

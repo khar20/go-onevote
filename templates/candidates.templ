@@ -1,0 +1,51 @@
+package templates
+
+import (
+	"fmt"
+	"onevote/models"
+)
+
+type CandidatesData struct {
+	Candidates []models.Candidate
+}
+
+templ CandidatesTempl(data CandidatesData) {
+	<html lang="es">
+		<head>
+			<link rel="stylesheet" href="/static/styles.css"/>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>OneVote - Candidatos</title>
+			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+		</head>
+		<body>
+			<nav class="navbar">
+				<div class="navbar-logo">
+					<a href="#">OneVote</a>
+				</div>
+				<div class="navbar-links">
+					<a href="/">Inicio</a>
+					<a href="/candidates">Candidatos</a>
+					<a href="/users/profile">Perfil</a>
+				</div>
+			</nav>
+			<div class="container">
+				<div class="voting-section">
+					<div class="voting-form">
+						<h2>Lista de Candidatos</h2>
+						<ul>
+							for _, candidate := range data.Candidates {
+								<li>
+									<a href={ templ.URL(fmt.Sprintf("/candidates/%s", candidate.ID)) }>{ candidate.Name }</a>
+								</li>
+							}
+						</ul>
+					</div>
+				</div>
+			</div>
+			<footer>
+				<p>&copy; 2024 OneVote</p>
+			</footer>
+		</body>
+	</html>
+}

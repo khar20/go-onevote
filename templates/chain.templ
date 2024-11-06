@@ -1,0 +1,46 @@
+package templates
+
+import "onevote/models"
+
+type ChainData struct {
+	Blocks []models.Block
+}
+
+templ ChainTempl(data ChainData) {
+	<html lang="es">
+		<head>
+			<link rel="stylesheet" href="/static/chain.css"/>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Vote Submission</title>
+			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+		</head>
+		<body>
+			<h2>Blockchain</h2>
+			<!-- Container where the blockchain data will be loaded -->
+			<div
+				id="chain"
+				hx-get="/chain"
+				hx-trigger="load, every 1s"
+				hx-swap="innerHTML"
+			></div>
+			<!-- Template for displaying blockchain data in Go -->
+			<script type="text/htmx-template" id="block-template">
+				{{ range .Blocks }}
+					<div class="block">
+						<h3>Block Number: {{ .BlockNumber }}</h3>
+						<p><strong>Previous Hash:</strong> {{ .PreviousHash }}</p>
+						<p><strong>Timestamp:</strong> {{ .Timestamp }}</p>
+						<p><strong>Votes:</strong></p>
+						<ul>
+							{{ range .Votes }}
+								<li>{{ .VoterID }} voted for {{ .CandidatoID }} at {{ .SedeID }} ({{ .TipoVoto }})</li>
+							{{ end }}
+						</ul>
+						<p><strong>Current Hash:</strong> {{ .CurrentHash }}</p>
+					</div>
+				{{ end }}
+			</script>
+		</body>
+	</html>
+}
