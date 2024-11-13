@@ -16,14 +16,17 @@ func GetHomePage(c echo.Context) error {
 }
 
 func PostVerifyCIP(c echo.Context) error { //htmx
-	formCip := c.FormValue("cip")
+	formCIP := c.FormValue("cip")
 
-	for _, user := range models.GetUsers() {
-		if user.Cip == formCip {
-			c.Response().Header().Set("HX-Location", fmt.Sprintf("/login/%s", user.Cip))
-			return c.NoContent(http.StatusFound)
-		}
+	user, err := models.GetUserByCIP(formCIP)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Unable to fetch user"})
 	}
 
-	return c.HTML(http.StatusBadRequest, "<p style='color: red;'>CIP no válido</p>")
+	if user == nil {
+		return c.HTML(http.StatusBadRequest, "<p style='color: red;'>CIP no válido</p>")
+	}
+
+	c.Response().Header().Set("HX-Location", fmt.Sprintf("/login/%s", user.CIP))
+	return c.NoContent(http.StatusFound)
 }

@@ -1,53 +1,148 @@
 package models
 
 import (
+	"context"
+	"fmt"
+	"onevote/database"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type User struct {
-	ID             string `json:"id" db:"id"`
-	Cip            string `json:"cip" db:"cip"`
-	Name           string
-	FatherLastName string
-	MotherLastName string
-	Password       string
-	PasswordHash   string    `json:"password_hash" db:"password_hash"`
-	CreatedAt      time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
+	ID            int    `db:"id"`             // SERIAL, PRIMARY KEY
+	CIP           string `db:"cip"`            // TEXT, NOT NULL
+	DNI           string `db:"dni"`            // TEXT, NOT NULL
+	Name          string `db:"name"`           // TEXT, NOT NULL
+	FirstSurname  string `db:"first_surname"`  // TEXT, NOT NULL
+	SecondSurname string `db:"second_surname"` // TEXT, NOT NULL
+	Email         string `db:"email"`          // TEXT, NOT NULL
+	BranchID      int    `db:"branch_id"`      // INTEGER, FOREIGN KEY to branches table
+	Role          string `db:"role"`           // TEXT, CHECK(role IN ('ADMIN', 'VOTER', 'MONITOR')), NOT NULL
+	Attended      int    `db:"attended"`       // INTEGER, NOT NULL, DEFAULT 0
+
+	CreatedAt time.Time `db:"created_at"` // TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP
+	UpdatedAt time.Time `db:"updated_at"` // TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP
 }
 
-// todo
-func GetUsers() []User {
-	return []User{
-		{
-			ID:             "1",
-			Cip:            "12345",
-			Password:       "hashedpassword1",
-			Name:           "Alex",
-			FatherLastName: "Rodríguez",
-			MotherLastName: "Díaz",
-			CreatedAt:      time.Now().AddDate(0, -1, 0),
-			UpdatedAt:      time.Now(),
-		},
-		{
-			ID:             "2",
-			Cip:            "67890",
-			Password:       "hashedpassword2",
-			Name:           "Alex",
-			FatherLastName: "Rodríguez",
-			MotherLastName: "Díaz",
-			CreatedAt:      time.Now().AddDate(0, -2, 0),
-			UpdatedAt:      time.Now(),
-		},
-		{
-			ID:             "3",
-			Cip:            "24680",
-			Password:       "hashedpassword3",
-			Name:           "Alex",
-			FatherLastName: "Rodríguez",
-			MotherLastName: "Díaz",
-			CreatedAt:      time.Now().AddDate(0, -3, 0),
-			UpdatedAt:      time.Now(),
-		},
+func GetUsers() ([]User, error) {
+	conn, err := database.ConnectDB()
+	if err != nil {
+		return nil, fmt.Errorf("unable to connect to database: %v", err)
 	}
+	defer conn.Close(context.Background())
+
+	rows, err := conn.Query(context.Background(), `
+		SELECT
+			id, cip, dni, name, first_surname, second_surname, email, branch_id, role, attended, created_at, updated_at
+		FROM users`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query users: %v", err)
+	}
+	defer rows.Close()
+
+	var users []User
+
+	for rows.Next() {
+		var user User
+		err := rows.Scan(
+			&user.ID,
+			&user.CIP,
+			&user.DNI,
+			&user.Name,
+			&user.FirstSurname,
+			&user.SecondSurname,
+			&user.Email,
+			&user.BranchID,
+			&user.Role,
+			&user.Attended,
+			&user.CreatedAt,
+			&user.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %v", err)
+		}
+		users = append(users, user)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("rows iteration error: %v", rows.Err())
+	}
+
+	return users, nil
+}
+
+func GetUserByCIP(cip string) (*User, error) {
+	conn, err := database.ConnectDB()
+	if err != nil {
+		return nil, fmt.Errorf("unable to connect to database: %v", err)
+	}
+	defer conn.Close(context.Background())
+
+	row := conn.QueryRow(context.Background(), `
+		SELECT
+			id, cip, dni, name, first_surname, second_surname, email, branch_id, role, attended, created_at, updated_at
+		FROM users
+		WHERE cip=$1`, cip)
+
+	var user User
+
+	err = row.Scan(
+		&user.ID,
+		&user.CIP,
+		&user.DNI,
+		&user.Name,
+		&user.FirstSurname,
+		&user.SecondSurname,
+		&user.Email,
+		&user.BranchID,
+		&user.Role,
+		&user.Attended,
+		&user.CreatedAt,
+		&user.UpdatedAt)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to scan user: %v", err)
+	}
+
+	return &user, nil
+}
+
+func GetUserByID(id string) (*User, error) {
+	conn, err := database.ConnectDB()
+	if err != nil {
+		return nil, fmt.Errorf("unable to connect to database: %v", err)
+	}
+	defer conn.Close(context.Background())
+
+	row := conn.QueryRow(context.Background(), `
+		SELECT
+			id, cip, dni, name, first_surname, second_surname, email, branch_id, role, attended, created_at, updated_at
+		FROM users
+		WHERE id=$1`, id)
+
+	var user User
+
+	err = row.Scan(
+		&user.ID,
+		&user.CIP,
+		&user.DNI,
+		&user.Name,
+		&user.FirstSurname,
+		&user.SecondSurname,
+		&user.Email,
+		&user.BranchID,
+		&user.Role,
+		&user.Attended,
+		&user.CreatedAt,
+		&user.UpdatedAt)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to scan user: %v", err)
+	}
+
+	return &user, nil
 }

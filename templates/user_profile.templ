@@ -31,8 +31,8 @@ templ UserProfileTempl(data UserProfileData) {
 					<div class="profile-container">
 						<h2>Perfil</h2>
 						<p><strong>Nombre:</strong> { data.User.Name }</p>
-						<p><strong>Apelido paterno:</strong> { data.User.FatherLastName }</p>
-						<p><strong>Apelido materno:</strong> { data.User.MotherLastName }</p>
+						<p><strong>Apelido paterno:</strong> { data.User.FirstSurname }</p>
+						<p><strong>Apelido materno:</strong> { data.User.SecondSurname }</p>
 						<button class="btn" onclick="location.href = '/vote';">Realizar voto</button>
 						<button class="btn logout-btn" hx-post="/users/logout">Cerrar sesión</button>
 					</div>

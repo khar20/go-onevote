@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
-	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
@@ -20,31 +19,31 @@ func Render(ctx echo.Context, statusCode int, component templ.Component) error {
 	return ctx.HTML(statusCode, buf.String())
 }
 
-func createSession(c echo.Context) error {
-	sess, err := session.Get("session", c)
-	if err != nil {
-		return err
-	}
+//func createSession(c echo.Context) error {
+//	sess, err := session.Get("session", c)
+//	if err != nil {
+//		return err
+//	}
+//
+//	sess.Options = &sessions.Options{
+//		Path:     "/",
+//		MaxAge:   86400,
+//		HttpOnly: true,
+//	}
+//
+//	sess.Values["authenticated"] = true
+//	return sess.Save(c.Request(), c.Response())
+//}
 
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   86400,
-		HttpOnly: true,
-	}
-
-	sess.Values["authenticated"] = true
-	return sess.Save(c.Request(), c.Response())
-}
-
-func clearSession(c echo.Context) error {
-	sess, err := session.Get("session", c)
-	if err != nil {
-		return err
-	}
-
-	sess.Options.MaxAge = -1
-	return sess.Save(c.Request(), c.Response())
-}
+//func clearSession(c echo.Context) error {
+//	sess, err := session.Get("session", c)
+//	if err != nil {
+//		return err
+//	}
+//
+//	sess.Options.MaxAge = -1
+//	return sess.Save(c.Request(), c.Response())
+//}
 
 // middleware check session
 func checkAuth(next echo.HandlerFunc) echo.HandlerFunc {

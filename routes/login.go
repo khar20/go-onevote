@@ -62,13 +62,11 @@ func PostLogin(c echo.Context) error { //htmx
 		HttpOnly: true,
 	}
 	sess.Values["authenticated"] = true
-	sess.Values["user-id"] = "1"
+	sess.Values["user-id"] = 1
 
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
 		return err
 	}
-
-	//return c.String(http.StatusOK, "Login successful!")
 
 	c.Response().Header().Set("HX-Location", "/profile")
 	return c.NoContent(http.StatusFound)

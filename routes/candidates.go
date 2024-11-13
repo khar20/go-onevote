@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"onevote/models"
 	"onevote/templates"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -24,9 +25,8 @@ func GetCandidatesPage(c echo.Context) error {
 }
 
 func GetCandidateProfile(c echo.Context) error {
-	candidateId := c.Param("candidate-id")
-
-	if candidateId == "" {
+	candidateId, err := strconv.Atoi(c.Param("candidate-id"))
+	if err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
 

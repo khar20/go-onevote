@@ -15,19 +15,17 @@ func GetUserProfile(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	auth, ok := sess.Values["authenticated"].(bool)
-	id, _ := sess.Values["user-id"].(string)
 
-	if !ok || !auth {
+	sessAuth, okAuth := sess.Values["authenticated"].(bool)
+	sessID, okID := sess.Values["user-id"].(string)
+
+	if !okAuth || !okID || !sessAuth {
 		return c.String(http.StatusUnauthorized, "Please log in to access this page")
 	}
 
-	var user *models.User
-	for _, u := range models.GetUsers() {
-		if u.ID == id {
-			user = &u
-			break
-		}
+	user, err := models.GetUserByID(sessID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Error retrieving user profile")
 	}
 
 	if user == nil {
