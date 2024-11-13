@@ -1,6 +1,9 @@
 package templates
 
-import "onevote/models"
+import (
+	"onevote/models"
+	"strconv"
+)
 
 type ChainData struct {
 	Blocks []models.Block
@@ -12,35 +15,32 @@ templ ChainTempl(data ChainData) {
 			<link rel="stylesheet" href="/static/chain.css"/>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>Vote Submission</title>
+			<title>OneVote</title>
 			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
 		</head>
 		<body>
-			<h2>Blockchain</h2>
-			<!-- Container where the blockchain data will be loaded -->
 			<div
 				id="chain"
 				hx-get="/chain"
 				hx-trigger="load, every 1s"
 				hx-swap="innerHTML"
-			></div>
-			<!-- Template for displaying blockchain data in Go -->
-			<script type="text/htmx-template" id="block-template">
-				{{ range .Blocks }}
+			>
+				<h2>Blockchain</h2>
+				for _, block := range data.Blocks {
 					<div class="block">
-						<h3>Block Number: {{ .BlockNumber }}</h3>
-						<p><strong>Previous Hash:</strong> {{ .PreviousHash }}</p>
-						<p><strong>Timestamp:</strong> {{ .Timestamp }}</p>
-						<p><strong>Votes:</strong></p>
+						<h3>Número de bloque: { strconv.Itoa(block.BlockNumber) }</h3>
+						<p><strong>Hash previo:</strong> { block.PreviousHash }</p>
+						<p><strong>Timestamp:</strong> { block.Timestamp.String() }</p>
+						<p><strong>Votos:</strong></p>
 						<ul>
-							{{ range .Votes }}
-								<li>{{ .VoterID }} voted for {{ .CandidatoID }} at {{ .SedeID }} ({{ .TipoVoto }})</li>
-							{{ end }}
+							for _, vote := range block.Votes {
+								<li>Voto para { vote.CandidateID } en { vote.Location } ({ vote.Type })</li>
+							}
 						</ul>
-						<p><strong>Current Hash:</strong> {{ .CurrentHash }}</p>
+						<p><strong>Hash actual:</strong> { block.CurrentHash }</p>
 					</div>
-				{{ end }}
-			</script>
+				}
+			</div>
 		</body>
 	</html>
 }

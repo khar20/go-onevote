@@ -2,6 +2,7 @@ package templates
 
 import (
 	"onevote/models"
+	"strconv"
 )
 
 type VotingData struct {
@@ -33,11 +34,11 @@ templ VotingTempl(data VotingData) {
 						<form hx-post="/vote" hx-target="#result">
 							for _, candidate := range data.Candidates {
 								<div class="form-group">
-									<input type="radio" id={ candidate.Name } name="candidate" value={ candidate.Name } required/>
-									<label for={ candidate.Name }>{ candidate.Name }</label>
+									<input type="radio" id={ strconv.Itoa(candidate.ID) } name="candidate" value={ strconv.Itoa(candidate.ID) } required/>
+								<label for={ strconv.Itoa(candidate.ID) }>{ candidate.Name }</label>
 								</div>
-								<button class="btn" type="submit">Enviar votos</button>
 							}
+							<button class="btn" type="submit">Enviar votos</button>
 						</form>
 						<div id="result"></div>
 					</div>

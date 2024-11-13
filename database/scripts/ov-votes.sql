@@ -3,4 +3,3 @@ CREATE TABLE blocks (
     id SERIAL PRIMARY KEY,
     block_data JSONB
 );
-

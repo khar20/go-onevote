@@ -1,9 +1,11 @@
 package routes
 
 import (
+	"log"
 	"net/http"
 	"onevote/models"
 	"onevote/templates"
+	"strconv"
 	"sync"
 	"time"
 
@@ -32,36 +34,49 @@ func GetVotePage(c echo.Context) error {
 	return Render(c, http.StatusOK, templates.VotingTempl(data))
 }
 
-// todo
-func PostVote(c echo.Context) error { // htmx
-	var msg models.Vote
-	if err := c.Bind(&msg); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid vote format"})
+func PostVote(c echo.Context) error {
+	candidateID := c.FormValue("candidate")
+	if candidateID == "" {
+		return c.String(http.StatusBadRequest, "Candidato no seleccionado")
 	}
 
-	msg.Timestamp = time.Now()
+	candidate, err := models.GetCandidateByID(candidateID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Candidato no seleccionado")
+	}
+
+	vote := models.Vote{
+		Location:    "LL",
+		Type:        "Consejo Nacional",
+		CandidateID: strconv.Itoa(candidate.ID),
+		Timestamp:   time.Now(),
+	}
 
 	mu.Lock()
-	voteQueue = append(voteQueue, msg)
+	voteQueue = append(voteQueue, vote)
 	mu.Unlock()
 
 	if len(voteQueue) >= batchSize {
 		go ProcessVotes()
 	}
 
-	return c.JSON(http.StatusAccepted, map[string]string{"message": "Vote received and is being processed"})
+	return c.JSON(http.StatusAccepted, "Vote received and is being processed")
 }
 
-// todo
+// creates a new block and insert it
 func ProcessVotes() {
 	mu.Lock()
 	defer mu.Unlock()
 
 	if len(voteQueue) >= batchSize {
-
 		newBlock := models.CreateBlock(voteQueue, &Blockchain)
 
 		Blockchain = append(Blockchain, newBlock)
+
+		if err := models.InsertBlock(newBlock); err != nil {
+			log.Printf("Failed to insert block into database: %v", err)
+			return
+		}
 
 		voteQueue = []models.Vote{}
 	}

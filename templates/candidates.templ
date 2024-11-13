@@ -36,7 +36,7 @@ templ CandidatesTempl(data CandidatesData) {
 						<ul>
 							for _, candidate := range data.Candidates {
 								<li>
-									<a href={ templ.URL(fmt.Sprintf("/candidates/%s", candidate.ID)) }>{ candidate.Name }</a>
+									<a href={ templ.URL(fmt.Sprintf("/candidates/%d", candidate.ID)) }>{ candidate.Name }</a>
 								</li>
 							}
 						</ul>

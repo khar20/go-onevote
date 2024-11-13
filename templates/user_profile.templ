@@ -34,7 +34,7 @@ templ UserProfileTempl(data UserProfileData) {
 						<p><strong>Apelido paterno:</strong> { data.User.FirstSurname }</p>
 						<p><strong>Apelido materno:</strong> { data.User.SecondSurname }</p>
 						<button class="btn" onclick="location.href = '/vote';">Realizar voto</button>
-						<button class="btn logout-btn" hx-post="/users/logout">Cerrar sesión</button>
+						<button class="btn logout-btn" hx-post="/logout">Cerrar sesión</button>
 					</div>
 				</div>
 			</div>

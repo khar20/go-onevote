@@ -32,6 +32,10 @@ func ChatbotTempl(data ChatbotData) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"es\"><head><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;1,100&amp;display=swap\" rel=\"stylesheet\"><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>OneVote - Chatbot</title><link rel=\"stylesheet\" href=\"/static/styles.css\"><script src=\"https://unpkg.com/htmx.org@2.0.3\"></script></head><body><nav class=\"navbar\"><div class=\"navbar-logo\"><a href=\"#\">OneVote</a></div><div class=\"navbar-links\"><a href=\"/candidates\">Candidatos</a> <a href=\"/chatbot\">Chatbot</a></div></nav><div class=\"container\"><div class=\"chatbot-section\"><div class=\"chatbot-container\"><div class=\"chatbot-header\"><h2>Chatbot - Asistente Virtual</h2></div><div class=\"chatbot-body\"><div id=\"chatbox\" class=\"chatbox\"></div><div class=\"chat-input\"><form hx-post=\"/chat\" hx-target=\"#chatbox\" hx-swap=\"beforeend\"><input type=\"text\" id=\"user-message\" name=\"message\" placeholder=\"Escribe tu mensaje...\" required> <button id=\"send-button\" class=\"btn\" type=\"submit\" disabled>Enviar</button></form></div></div></div></div></div></body></html>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		return templ_7745c5c3_Err
 	})
 }

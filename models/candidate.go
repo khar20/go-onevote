@@ -28,7 +28,7 @@ type Candidate struct {
 }
 
 func GetCandidates() ([]Candidate, error) {
-	conn, err := database.ConnectDB()
+	conn, err := database.ConnectCoreDB()
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %v", err)
 	}
@@ -72,7 +72,7 @@ func GetCandidates() ([]Candidate, error) {
 }
 
 func GetCandidateByCIP(cip string) (*Candidate, error) {
-	conn, err := database.ConnectDB()
+	conn, err := database.ConnectCoreDB()
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %v", err)
 	}
@@ -85,6 +85,49 @@ func GetCandidateByCIP(cip string) (*Candidate, error) {
 			academic_background, additional_info, created_at, updated_at 
 		FROM candidates 
 		WHERE cip = $1`, cip)
+
+	var candidate Candidate
+
+	err = row.Scan(
+		&candidate.ID,
+		&candidate.CIP,
+		&candidate.DNI,
+		&candidate.Name,
+		&candidate.FirstSurname,
+		&candidate.SecondSurname,
+		&candidate.PartyID,
+		&candidate.BranchID,
+		&candidate.PositionApplied,
+		&candidate.PreviousExperience,
+		&candidate.AcademicBackground,
+		&candidate.AdditionalInfo,
+		&candidate.CreatedAt,
+		&candidate.UpdatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to scan candidate: %v", err)
+	}
+
+	return &candidate, nil
+}
+
+func GetCandidateByID(id string) (*Candidate, error) {
+	conn, err := database.ConnectCoreDB()
+	if err != nil {
+		return nil, fmt.Errorf("unable to connect to database: %v", err)
+	}
+	defer conn.Close(context.Background())
+
+	row := conn.QueryRow(context.Background(), `
+		SELECT 
+			id, cip, dni, name, first_surname, second_surname, 
+			party_id, branch_id, position_applied, previous_experience, 
+			academic_background, additional_info, created_at, updated_at 
+		FROM candidates 
+		WHERE id = $1`, id)
 
 	var candidate Candidate
 

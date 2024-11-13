@@ -17,9 +17,9 @@ func GetUserProfile(c echo.Context) error {
 	}
 
 	sessAuth, okAuth := sess.Values["authenticated"].(bool)
-	sessID, okID := sess.Values["user-id"].(string)
+	sessID, _ := sess.Values["user-id"].(string)
 
-	if !okAuth || !okID || !sessAuth {
+	if !okAuth || !sessAuth {
 		return c.String(http.StatusUnauthorized, "Please log in to access this page")
 	}
 
@@ -47,5 +47,8 @@ func PostLogout(c echo.Context) error {
 	sess.Values["authenticated"] = false
 	sess.Values["user-id"] = "0"
 	sess.Options.MaxAge = -1
-	return sess.Save(c.Request(), c.Response())
+	sess.Save(c.Request(), c.Response())
+
+	c.Response().Header().Set("HX-Location", "/login")
+	return c.NoContent(http.StatusFound)
 }
