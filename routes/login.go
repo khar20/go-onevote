@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"onevote/models"
 	"onevote/templates"
 	"strconv"
 
@@ -39,16 +40,20 @@ func HandleRedirect(c echo.Context) error {
 	return Render(c, http.StatusFound, templates.LoginTempl(data))
 }
 
-func PostLogin(c echo.Context) error { //htmx
+func PostLogin(c echo.Context) error { // htmx
 	cip := c.FormValue("cip")
-	password := c.FormValue("password")
 
-	if cip == "" || password == "" {
+	if cip == "" {
 		return c.HTML(http.StatusBadRequest, "<p style='color: red;'>CIP y contraseña son necesarios</p>")
 	}
 
-	if cip != "1234" || password != "1234" {
-		return c.String(http.StatusUnauthorized, "Invalid username or password")
+	user, err := models.GetUserByCIP(cip)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Error al recuperar usuario")
+	}
+
+	if user == nil {
+		return c.String(http.StatusUnauthorized, "CIP o contraseña inválidos")
 	}
 
 	sess, err := session.Get("session", c)
@@ -62,7 +67,7 @@ func PostLogin(c echo.Context) error { //htmx
 		HttpOnly: true,
 	}
 	sess.Values["authenticated"] = true
-	sess.Values["user-id"] = 1
+	sess.Values["user-id"] = strconv.Itoa(user.ID)
 
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
 		return err

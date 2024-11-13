@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"onevote/models"
+	"onevote/templates"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -32,6 +33,20 @@ func GetChain(c echo.Context) error {
 	defer mu.Unlock()
 
 	return c.JSON(http.StatusOK, Blockchain)
+}
+
+func GetChainPage(c echo.Context) error {
+	blocks, err := models.GetBlocks()
+
+	if err != nil {
+		return err
+	}
+
+	data := templates.ChainData{
+		Blocks: blocks,
+	}
+
+	return Render(c, http.StatusOK, templates.ChainTempl(data))
 }
 
 // create a genesis block and inits the blockchain

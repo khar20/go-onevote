@@ -76,7 +76,7 @@ func UserProfileTempl(data UserProfileData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><button class=\"btn\" onclick=\"location.href = &#39;/vote&#39;;\">Realizar voto</button> <button class=\"btn logout-btn\" hx-post=\"/users/logout\">Cerrar sesión</button></div></div></div></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><button class=\"btn\" onclick=\"location.href = &#39;/vote&#39;;\">Realizar voto</button> <button class=\"btn logout-btn\" hx-post=\"/logout\">Cerrar sesión</button></div></div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

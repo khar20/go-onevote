@@ -45,8 +45,23 @@ func Render(ctx echo.Context, statusCode int, component templ.Component) error {
 //	return sess.Save(c.Request(), c.Response())
 //}
 
-// middleware check session
-func checkAuth(next echo.HandlerFunc) echo.HandlerFunc {
+// middleware user auth check session
+func voterCheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		sess, err := session.Get("session", c)
+		if err != nil {
+			return err
+		}
+		auth, ok := sess.Values["authenticated"].(bool)
+		if !ok || !auth {
+			return c.String(http.StatusUnauthorized, "Please log in to access this page")
+		}
+		return next(c)
+	}
+}
+
+// middleware user auth check session
+func adminCheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		sess, err := session.Get("session", c)
 		if err != nil {
@@ -64,15 +79,16 @@ func SetUpRoutes(e *echo.Echo) {
 	e.GET("/", GetHomePage)                                 // render homepage
 	e.GET("/login/:cip", GetLoginPage)                      // render login page with CIP
 	e.GET("/login", GetLoginPage)                           // render login page
-	e.GET("/profile", GetUserProfile, checkAuth)            // render user profile
+	e.GET("/profile", GetUserProfile, voterCheckAuth)       // render user profile
 	e.GET("/candidates", GetCandidatesPage)                 // render candidates list
 	e.GET("/candidates/:candidate-id", GetCandidateProfile) // render specific candidate profile
-	e.GET("/vote", GetVotePage, checkAuth)                  // render voting page
-	//todo
-	//e.GET("/chain", GetChainPage, checkAuth)                // render blockchain or chain info
+	e.GET("/vote", GetVotePage, voterCheckAuth)             // render voting page
+	e.GET("/admin", GetAdminPage, adminCheckAuth)           // render blockchain or chain info
+	e.GET("/chat", GetChatPage, voterCheckAuth)             // render chatbot page
+	e.GET("/chain", GetChainPage, voterCheckAuth)           // render blockchain or chain info
 
-	e.POST("/verify-cip", PostVerifyCIP)     // htmx - verify CIP
-	e.POST("/logout", PostLogout, checkAuth) // htmx - handle session logout
-	e.POST("/login", PostLogin)              // htmx - handle login
-	e.POST("/vote", PostVote, checkAuth)     // htmx - handle post vote
+	e.POST("/verify-cip", PostVerifyCIP)          // htmx - verify CIP
+	e.POST("/logout", PostLogout, voterCheckAuth) // htmx - handle session logout
+	e.POST("/login", PostLogin)                   // htmx - handle login
+	e.POST("/vote", PostVote, voterCheckAuth)     // htmx - handle post vote
 }

@@ -26,7 +26,7 @@ type User struct {
 }
 
 func GetUsers() ([]User, error) {
-	conn, err := database.ConnectDB()
+	conn, err := database.ConnectCoreDB()
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %v", err)
 	}
@@ -34,8 +34,9 @@ func GetUsers() ([]User, error) {
 
 	rows, err := conn.Query(context.Background(), `
 		SELECT
-			id, cip, dni, name, first_surname, second_surname, email, branch_id, role, attended, created_at, updated_at
-		FROM users`)
+			u.id, u.cip, u.dni, u.name, u.first_surname, u.second_surname, u.email, u.branch_id, b.branch_name, u.role, u.attended, u.created_at, u.updated_at
+		FROM users u
+		JOIN branches b ON u.branch_id = b.id`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query users: %v", err)
 	}
@@ -72,7 +73,7 @@ func GetUsers() ([]User, error) {
 }
 
 func GetUserByCIP(cip string) (*User, error) {
-	conn, err := database.ConnectDB()
+	conn, err := database.ConnectCoreDB()
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %v", err)
 	}
@@ -110,7 +111,7 @@ func GetUserByCIP(cip string) (*User, error) {
 }
 
 func GetUserByID(id string) (*User, error) {
-	conn, err := database.ConnectDB()
+	conn, err := database.ConnectCoreDB()
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %v", err)
 	}

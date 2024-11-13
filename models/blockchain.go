@@ -1,29 +1,32 @@
 package models
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"onevote/database"
 	"time"
 )
 
 // block struct
 type Block struct {
 	BlockNumber  int       `json:"block_number"`
-	PreviousHash string    `json:"previous_hash"`
 	Timestamp    time.Time `json:"timestamp"`
-	Votes        []Vote    `json:"votes"`
+	PreviousHash string    `json:"previous_hash"`
 	CurrentHash  string    `json:"current_hash"`
+	Votes        []Vote    `json:"votes"`
+	MerkleRoot   string    `json:"merkle_root"`
 }
 
 // vote struct
 type Vote struct {
-	UserID      string    `json:"voter_id"`
-	SedeID      string    `json:"sede_id"`
-	Type        string    `json:"tipo_voto"`
-	CandidateID string    `json:"candidato_id"`
+	Location    string    `json:"location_id"`
+	Type        string    `json:"type"`
+	CandidateID string    `json:"candidate_id"`
 	Timestamp   time.Time `json:"timestamp"`
 }
 
-// merklenode struct
+// merkleNode struct
 type MerkleNode struct {
 	Left  *MerkleNode
 	Right *MerkleNode
@@ -37,9 +40,8 @@ func BuildMerkleTree(votes []Vote) *MerkleNode {
 	}
 
 	var nodes []MerkleNode
-
 	for _, vote := range votes {
-		data := fmt.Sprintf("%s:%s:%s:%s:%s", vote.UserID, vote.SedeID, vote.Type, vote.CandidateID, vote.Timestamp)
+		data := fmt.Sprintf("%s:%s:%s:%s", vote.Location, vote.Type, vote.CandidateID, vote.Timestamp)
 		hash := CalculateHash(data)
 		nodes = append(nodes, MerkleNode{Hash: hash})
 	}
@@ -67,7 +69,6 @@ func BuildMerkleTree(votes []Vote) *MerkleNode {
 // creates a new block from votes
 func CreateBlock(votes []Vote, blockchain *[]Block) Block {
 	var merkleRoot string
-
 	if len(votes) > 0 {
 		merkleRoot = BuildMerkleTree(votes).Hash
 	} else {
@@ -79,45 +80,72 @@ func CreateBlock(votes []Vote, blockchain *[]Block) Block {
 		Timestamp:    time.Now(),
 		PreviousHash: "",
 		Votes:        votes,
+		MerkleRoot:   merkleRoot,
 	}
 
 	if len(*blockchain) > 0 {
 		block.PreviousHash = (*blockchain)[len(*blockchain)-1].CurrentHash
 	}
+
 	block.CurrentHash = CalculateHash(fmt.Sprintf("%d%s%s", block.BlockNumber, block.Timestamp, merkleRoot))
 	return block
 }
 
-// retrieves all blocks from the database
-//func GetBlocks(db *sql.DB) ([]Block, error) {
-//	query := `SELECT block_number, previous_hash, timestamp, votes, current_hash FROM blocks ORDER BY block_number ASC`
-//
-//	rows, err := db.Query(query)
-//	if err != nil {
-//		return nil, fmt.Errorf("error querying blocks: %v", err)
-//	}
-//	defer rows.Close()
-//
-//	var blocks []Block
-//
-//	for rows.Next() {
-//		var block Block
-//		var votesJSON string
-//
-//		if err := rows.Scan(&block.BlockNumber, &block.PreviousHash, &block.Timestamp, &votesJSON, &block.CurrentHash); err != nil {
-//			return nil, fmt.Errorf("error scanning row: %v", err)
-//		}
-//
-//		if err := json.Unmarshal([]byte(votesJSON), &block.Votes); err != nil {
-//			return nil, fmt.Errorf("error unmarshaling votes: %v", err)
-//		}
-//
-//		blocks = append(blocks, block)
-//	}
-//
-//	if err := rows.Err(); err != nil {
-//		return nil, fmt.Errorf("error during rows iteration: %v", err)
-//	}
-//
-//	return blocks, nil
-//}
+// retrieves all the blocks
+func GetBlocks() ([]Block, error) {
+	conn, err := database.ConnectVotesDB()
+	if err != nil {
+		return nil, fmt.Errorf("unable to connect to database: %w", err)
+	}
+	defer conn.Close(context.Background())
+
+	rows, err := conn.Query(context.Background(), "SELECT block_data FROM blocks")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query blocks: %w", err)
+	}
+	defer rows.Close()
+
+	var blocks []Block
+	for rows.Next() {
+		var blockData []byte
+		if err := rows.Scan(&blockData); err != nil {
+			return nil, fmt.Errorf("failed to scan block_data: %w", err)
+		}
+
+		var block Block
+		if err := json.Unmarshal(blockData, &block); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal block_data into Block: %w", err)
+		}
+
+		blocks = append(blocks, block)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
+
+	return blocks, nil
+}
+
+// inserts a block into the database
+func InsertBlock(block Block) error {
+	blockData, err := json.Marshal(block)
+	if err != nil {
+		return fmt.Errorf("failed to marshal block: %w", err)
+	}
+
+	conn, err := database.ConnectVotesDB()
+	if err != nil {
+		return fmt.Errorf("unable to connect to database: %w", err)
+	}
+	defer conn.Close(context.Background())
+
+	_, err = conn.Exec(context.Background(), `
+		INSERT INTO blocks (block_data) 
+		VALUES ($1)`, blockData)
+	if err != nil {
+		return fmt.Errorf("failed to insert block into database: %w", err)
+	}
+
+	return nil
+}

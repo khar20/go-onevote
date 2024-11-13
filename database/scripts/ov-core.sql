@@ -78,3 +78,14 @@ CREATE TABLE IF NOT EXISTS candidate_embeddings (
 
     FOREIGN KEY (candidate_id) REFERENCES candidates(id) ON DELETE CASCADE
 );
+
+CREATE TABLE config (
+    id SERIAL PRIMARY KEY,  -- pk
+    election_start TIMESTAMP NOT NULL,
+    election_end TIMESTAMP NOT NULL,
+
+    created_by INTEGER NOT NULL,  -- fk users
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (created_by) REFERENCES users(id)
+);
